@@ -13,11 +13,14 @@ export default class Projectile extends PIXI.Sprite {
       this.maxDistance = 3000; // maxDistance radiuse for the projectile center having the enemy 
       this.anchor.set(0.5); // Set the anchor point of the sprite to its center
       this.type = "blue";
+      this.destroied = false;
 
     }
     // Update function for the Projectile class
     // Moves the projectile in the specified direction and checks if it has exceeded its maximum distance
     update() {
+      if(this.destroied) 
+         return;
       this.x += Math.cos(this.direction) * this.speed;
       this.y += Math.sin(this.direction) * this.speed;
       const dx = this.x - this.theShooter.sprite.x;
@@ -39,6 +42,7 @@ export default class Projectile extends PIXI.Sprite {
         this.texture = null;
         this.x = null;
         this.y = null;
+        this.destroied = true;
       }
 
     checkCollision(sprite) {

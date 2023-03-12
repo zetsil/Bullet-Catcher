@@ -9,15 +9,16 @@ class WizardProjectile extends Projectile
       this.y += Math.sin(this.direction) * this.speed;
       const dx = this.x - this.theShooter.sprite.x;
       const dy = this.y - this.theShooter.sprite.y;
+      this.type = "purple";
       const distance = Math.sqrt(dx * dx + dy * dy);
       if (distance > this.maxDistance)
       {
         this.destroy();     
       }
       this.theShooter.game.enemy_list.forEach(enemy => {
-         if(this.checkCollision(enemy.sprite))
+         if(this.checkCollision(enemy) && enemy.speed != null)
          {
-            enemy.destroy();
+            enemy.hit();
             this.destroy();
          }
       });
@@ -28,22 +29,32 @@ export default class Wizard extends PIXI.Container {
     constructor(game) {
       super();
       this.game = game;
-      this.sprite = new PIXI.Sprite(game.loader.resources.wizard.texture);
+      this.sprite = new PIXI.Sprite(PIXI.Texture.from('wizard'));
       this.sprite.anchor.set(0.5);
-      this.sprite.x = 20;
-      this.sprite.y = 20 ;
+      // this.sprite.x = 20;
+      // this.sprite.y = 20 ;
+      this.x = 1;
+      this.y = 1;
       this.sprite.scale.x = 0.8;
       this.sprite.scale.y = 0.8;
-      this.health = 10;
+      this.currentHealth = 10;
+      this.totalHealth = 10;
       this.addChild(this.sprite);
       game.app.stage.addChild(this);
 
 
-      this.projectileTexture = game.loader.resources.purple_projectile.texture;
+      this.projectileTexture = PIXI.Texture.from('purple_projectile');
       this.projectileSpeed = 9;
       this.wizardProjectiles = [];
       this.blue_projectile = 0;
       this.max_blue_projectile = 1;
+
+
+      // this.bullet_spot = new PIXI.Sprite(game.loader.resources.blue_spot.texture);
+      // this.addChild(this.bullet_spot);
+      // this.bullet_spot.x = -20;
+      // this.bullet_spot.y = -20;
+
 
 
 
@@ -64,36 +75,64 @@ export default class Wizard extends PIXI.Container {
     key_handle() {
         // Check if the right arrow key is pressed
         if (this.game.key.presed.ArrowRight) {
-          this.sprite.x += 4;
+          this.x += 4;
           // Handle right arrow key press
         }
         // Check if the left arrow key is pressed
         else if (this.game.key.presed.ArrowLeft) {
-          this.sprite.x -= 4;
+          this.x -= 4;
           // Handle left arrow key press
         }
         // Check if the up arrow key is pressed
         else if (this.game.key.presed.ArrowUp) {
-          this.sprite.y -= 4;
+          this.y -= 4;
           // Handle up arrow key press
         }
         // Check if the down arrow key is pressed
         else if (this.game.key.presed.ArrowDown) {
-          this.sprite.y += 4;
+          this.y += 4;
           // Handle down arrow key press
         }
-         this.game.app.stage.x = -this.sprite.x + 35 * 10 ;
-         this.game.app.stage.y = -this.sprite.y + 62 * 5 ;
+         this.game.app.stage.x = -this.x + 35 * 10 ;
+         this.game.app.stage.y = -this.y + 62 * 5 ;
         //  console.log(this.sprite.x)
       }
 
     hit_by_projectile(projectile)
     {
+      console.log(this.currentHealth);
       projectile.destroy();
-      this.health --;
+
+      
       if(this.blue_projectile < this.max_blue_projectile )
             this.blue_projectile++;
+      else {
+          this.currentHealth --;
+          this.hit();
+      }
+
+      
     }  
+
+    hit()
+    {
+      const healthPercentage = this.getHealthPercentage();
+      this.game.UI.WizardhealthBar.width = healthPercentage / 100 * 80;
+     
+      // if(this.currentHealth == 0 )
+      //   this.destroy();
+
+    }  
+
+
+    getHealthPercentage() {
+      return this.currentHealth / this.totalHealth * 100;
+    }
+
+
+    getHealthPercentage() {
+      return this.currentHealth / this.totalHealth * 100;
+    }
 
     calculateAngle(x,y)
     {
@@ -114,8 +153,8 @@ export default class Wizard extends PIXI.Container {
         return;  
       const velocity = new PIXI.Point(Math.cos(angle), Math.sin(angle));
       const projectile = new WizardProjectile(this.projectileTexture, this.projectileSpeed, angle,this);
-      projectile.x = this.sprite.x ; // spawn the projectile in front of the Enemy
-      projectile.y = this.sprite.y ;
+      projectile.x = this.x ; // spawn the projectile in front of the Enemy
+      projectile.y = this.y ;
       this.game.app.stage.addChild(projectile); // add projectile sprite to stage 
       this.wizardProjectiles.push(projectile); // add the projectile to a list for collision detection
     }   

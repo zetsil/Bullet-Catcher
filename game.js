@@ -1,7 +1,6 @@
 import Wizard from "./wizard.js";
 import Enemy from "./enemy.js";
-
-
+import UI from "./ui.js";
 // Define a Keyboard class to handle keyboard input
 class Keyboard {
     constructor(){
@@ -43,6 +42,9 @@ class Game{
                .add('projectile','./assets/blue_projectile.png')
                .add('red_projectile','./assets/red_projectile.png')
                .add('purple_projectile','./assets/wizard_projectile.png')
+               .add('blue_spot','./assets/blue_bullet_spot.png')
+               .add('blue_spot_full','./assets/blue_bullet_spot_full.png')
+
 
    document.body.appendChild(this.app.view)
    
@@ -65,17 +67,22 @@ this.enemy_projectiles = [] //
 
 loop(delta)
 {
-    this.updateEnemy()
-    this.wizard.key_handle()
+    this.updateEnemy();
+    this.wizard.key_handle();
+    this.UI.update();
     this.wizard.wizardProjectiles.forEach(projectile => {
         projectile.update();
     });
+
+
 }
 
 setup()
 {
       this.wizard = new Wizard(this)
       this.createEnemys()
+      this.UI = new UI(this);
+
 }
 
 createEnemys()
@@ -96,7 +103,8 @@ updateEnemy() {
   this.enemy_list.forEach(element => {
     element.update();     
   });
-
+  let filteredProjectiles = this.enemy_projectiles.filter(obj => obj.destroied == false);
+  this.enemy_projectiles = filteredProjectiles;
   // Loop through each enemy projectile in the enemy_projectiles array and call the update method on each projectile
   this.enemy_projectiles.forEach((projectile) => {
 
@@ -112,10 +120,11 @@ updateEnemy() {
     }
 
     // If the current projectile is colliding with the player's wizard and has a texture
-    if (projectile.checkCollision(this.wizard.sprite) && projectile.texture != null) {
+    if (projectile.checkCollision(this.wizard) && projectile.texture != null) {
       this.wizard.hit_by_projectile(projectile); // Call the hit_by_projectile method on the player's wizard object, passing in the current projectile as an argument
     }
   });
+ 
 }
 
 }
