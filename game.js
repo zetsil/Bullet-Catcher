@@ -1,5 +1,6 @@
 import Wizard from "./wizard.js";
 import Enemy from "./enemy.js";
+import YelowEnemy from "./yellow_enemy.js";
 import UI from "./ui.js";
 // Define a Keyboard class to handle keyboard input
 class Keyboard {
@@ -40,10 +41,15 @@ class Game{
    this.loader.add('wizard','./assets/wizard.png')
                .add('rock_enemy','./assets/rock_enemy.png')
                .add('projectile','./assets/blue_projectile.png')
+               .add('yellow_projectile','./assets/yellow_projectile.png')
                .add('red_projectile','./assets/red_projectile.png')
                .add('purple_projectile','./assets/wizard_projectile.png')
                .add('blue_spot','./assets/blue_bullet_spot.png')
                .add('blue_spot_full','./assets/blue_bullet_spot_full.png')
+               .add('red_explosion','./assets/red_explosion.png')
+               .add('blue_explosion','./assets/blue_explosion.png')
+
+
 
 
    document.body.appendChild(this.app.view)
@@ -110,17 +116,9 @@ updateEnemy() {
 
     projectile.update(); // Update the internal state and position of the projectile
 
-    // If the player's wizard has max blue projectiles and the current projectile being updated is a blue projectile and the texture is not already the red projectile texture
-    if (this.wizard.blue_projectile == this.wizard.max_blue_projectile && projectile.type == "blue" && projectile.texture != this.loader.resources.red_projectile.texture) {
-      projectile.texture = this.loader.resources.red_projectile.texture; // Change the texture of the projectile to the red projectile texture
-    }
-    // If the player's wizard has no blue projectiles left and the current projectile being updated is a blue projectile and the texture is not already the default projectile texture
-    else if (this.wizard.blue_projectile == 0 && projectile.type == "blue" && projectile.texture != this.loader.resources.projectile.texture) {
-      projectile.texture = this.loader.resources.projectile.texture; // Change the texture of the projectile to the default projectile texture
-    }
-
     // If the current projectile is colliding with the player's wizard and has a texture
-    if (projectile.checkCollision(this.wizard) && projectile.texture != null) {
+    if (projectile.checkCollision(this.wizard) && projectile.texture != null) 
+    {
       this.wizard.hit_by_projectile(projectile); // Call the hit_by_projectile method on the player's wizard object, passing in the current projectile as an argument
     }
   });

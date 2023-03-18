@@ -14,6 +14,13 @@ export default class UI extends PIXI.Container {
         this.game.app.stage.addChild(this);
 
 
+        this.WizardhealthBarEmpty = new PIXI.Graphics();
+        this.WizardhealthBarEmpty.beginFill(0xA0A0A0);
+        this.WizardhealthBarEmpty.drawRect(-25, -40, 80, 5);
+        this.WizardhealthBarEmpty.endFill();
+        this.addChild(this.WizardhealthBarEmpty);
+
+
         this.WizardhealthBar = new PIXI.Graphics();
         this.WizardhealthBar.beginFill(0x225128);
         this.WizardhealthBar.drawRect(-25, -40, 80, 5);

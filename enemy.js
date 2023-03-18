@@ -15,6 +15,7 @@ export default class Enemy extends PIXI.Container {
       this.projectileTimer = 500;
       this.projectileCooldown = 500;
       this.projectileSpeed = 3;
+      this.original_texture = PIXI.Texture.from('projectile');
       this.projectileTexture = PIXI.Texture.from('projectile');
       this.projectileCooldown = 60; // 60 frames between each shot
       this.projectileTimer = this.projectileCooldown; // start with a full cooldown
@@ -23,11 +24,20 @@ export default class Enemy extends PIXI.Container {
       // Health Bar
       this.currentHealth= 2;
       this.totalHealth = 2;
+
+      this.healthBarEmpty = new PIXI.Graphics();
+      this.healthBarEmpty.beginFill(0xA0A0A0);
+      this.healthBarEmpty.drawRect(-25, -40, 50, 5);
+      this.healthBarEmpty.endFill();
+      this.addChild(this.healthBarEmpty);
+
       this.healthBar = new PIXI.Graphics();
       this.healthBar.beginFill(0xff0000);
       this.healthBar.drawRect(-25, -40, 50, 5);
       this.healthBar.endFill();
       this.addChild(this.healthBar);
+
+
     }
 
     update()
@@ -64,8 +74,10 @@ export default class Enemy extends PIXI.Container {
       const healthPercentage = this.getHealthPercentage();
       this.healthBar.width = healthPercentage / 100 * 100;
      
-      if(this.currentHealth == 0 )
+      if(this.currentHealth == 0 ){
         this.destroy();
+
+      }
 
     }  
 
