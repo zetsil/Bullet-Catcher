@@ -1,3 +1,5 @@
+
+import UpdateTypes from "./updateTypes.js";
 //   Constructor for the Projectile class
 //   Parameters:
 // - texture: the texture for the projectile sprite
@@ -5,6 +7,15 @@
 // - direction: the direction in radians that the projectile moves in
 // - theShooter: the theShooter object from witch the projectil is shoot 
 export default class Projectile extends PIXI.Sprite {
+
+  static type_full = {
+    yellow: { isFull: false },
+    blue: { isFull: false },
+    pink: { isFull: false }
+  };
+
+  static is_visible = true;
+
   constructor(texture, speed, direction, theShooter){
     super(texture);
     this.original_texture = texture;
@@ -19,11 +30,55 @@ export default class Projectile extends PIXI.Sprite {
     this.emitter = null;
     this.explode_timeout = 15;
 
+    // Register this projectile as an observer to the wizard
+    this.theShooter.game.wizard.addObserver(this);
 
   }
+
+  updateState(subject, updateType) {
+    if (updateType === UpdateTypes.PROJECTILE_COUNT_CHANGED) {
+        this.handleProjectileUpdate(subject.bullet_holder);
+    }
+    
+
+  }
+
+  handleProjectileUpdate(bulletHolder) {
+    // Retrieve all bullets from the BulletHolder
+    const bullets = bulletHolder.order; // Assuming this method exists
+
+    // Iterate over each bullet
+    bullets.forEach(bullet => {
+        const bullet_type = bullet.type;
+
+        // Ensure bullet type exists in Projectile.type_full
+        if (Projectile.type_full[bullet_type]) {
+            // Update the corresponding entry in type_full
+            if (bullet.isFull()) {
+                Projectile.type_full[bullet_type].isFull = true;
+            } else {
+                Projectile.type_full[bullet_type].isFull = false;
+            }
+        } else {
+            // Handle the case where the bullet type is not defined in Projectile.type_full
+            console.warn(`Bullet type ${bullet_type} does not exist in Projectile.type_full`);
+        }
+    });
+  }
+  
+
   // Update function for the Projectile class
   // Moves the projectile in the specified direction and checks if it has exceeded its maximum distance
   update() {
+
+    if (Projectile.is_visible)
+       this.visible = true;
+    else{
+       this.visible = false;
+       return;
+    }
+       
+       
     if(this.emitter !== null)
     {
        this.emitter.update(0.009);
@@ -32,13 +87,6 @@ export default class Projectile extends PIXI.Sprite {
     if (this.destroied)
       return;  
   //  this.emitter.update(1);
-
-  // If the player's wizard has max blue/red/yellow projectiles and the current projectile being updated is a blue/red/yellow projectile and the texture is not already the red projectile texture
-  if (this.theShooter.game.wizard.map_current_projectiles.get(this.type) == this.theShooter.game.wizard.max_projectile_map.get(this.type) &&  this.texture != this.red_texture)
-      this.texture = this.red_texture; // Change the texture of the projectile to the red projectile texture
-  // If the cuurent projectiles of the wizard are not full     
-  else if(this.theShooter.game.wizard.map_current_projectiles.get(this.type) < this.theShooter.game.wizard.max_projectile_map.get(this.type) &&  this.texture != this.original_texture)    
-      this.texture = this.original_texture; // Change the texture of the projectile to the original(blue/red/yellow) projectile texture
 
     this.x += Math.cos(this.direction) * this.speed;
     this.y += Math.sin(this.direction) * this.speed;
@@ -54,6 +102,10 @@ export default class Projectile extends PIXI.Sprite {
        this.destroy();
 
      }
+    if (Projectile.type_full[this.type].isFull && this.texture !== this.red_texture) {
+      this.texture = this.red_texture;} 
+    else if (!Projectile.type_full[this.type].isFull && this.texture !== this.original_texture) {
+      this.texture = this.original_texture;}
   }
   // Destroy function for the Projectile class
   // Removes the sprite from its parent container and cleans up its properties
@@ -141,8 +193,6 @@ export default class Projectile extends PIXI.Sprite {
        this.emitter_texture =  PIXI.Texture.from('blue_explosion');
     if(this.texture == PIXI.Texture.from('projectile'))
        this.emitter_texture =  PIXI.Texture.from('blue_explosion');   
-       
-
 
     // Creează un emitter de particule
     this.emitter = new PIXI.particles.Emitter(
@@ -202,7 +252,6 @@ export default class Projectile extends PIXI.Sprite {
 
     this.theShooter.game.app.stage.addChild(this.particleContainer);
 
-
   }
 
   emitExplosion()
@@ -214,17 +263,11 @@ export default class Projectile extends PIXI.Sprite {
 
     this.emitter.emit = true;
 
-
-
     this.speed = null;
     this.direction = null;
     this.texture = null;
     this.x = null;
     this.y = null;
-   // this.destroied = true;
-
-    // Play the emitter's animation
-    // this.emitter.playOnce();
   }
 
 }
